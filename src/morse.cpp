@@ -1,4 +1,16 @@
+#include <Arduino.h>
+
+#include <FastLED.h>
+#include <si5351.h>
+
+#include "config.h"
 #include "morse.h"
+
+CRGB leds[NUM_LEDS];
+
+Si5351 si5351;
+
+unsigned long freqCLK[3] = {28124600, 50293000, 144488500};
 
 morse_char_t MorseCode[] = {
     {'A', '.', '-',  0,   0,   0,   0},
@@ -46,7 +58,39 @@ morse_char_t MorseCode[] = {
 };
 
 
-void play_message(String m)
+void morseInit() {
+  FastLED.addLeds<WS2812B, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.setBrightness(64);
+
+  // Start serial and initialize the Si5351
+  bool i2c_detect = si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0);
+  if(i2c_detect)
+  {
+    si5351.set_pll(SI5351_PLL_FIXED, SI5351_PLLA);
+    si5351.set_freq(freqCLK[0] * SI5351_FREQ_MULT, SI5351_CLK0);
+    si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);
+    si5351.output_enable(SI5351_CLK0, 0);
+    Serial.println(F("INIT si5351... CLK0"));
+
+    si5351.set_freq(freqCLK[1] * SI5351_FREQ_MULT, SI5351_CLK1);
+    si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);
+    si5351.output_enable(SI5351_CLK1, 0);
+    Serial.println(F("INIT si5351... CLK1"));
+
+    si5351.set_freq(freqCLK[2] * SI5351_FREQ_MULT, SI5351_CLK2);
+    si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);
+    si5351.output_enable(SI5351_CLK2, 0);
+    Serial.println(F("INIT si5351... CLK2"));
+
+    Serial.println(F("INIT si5351... DONE"));
+  }
+  else
+  {
+    Serial.println(F("si5351 not detected on I2C bus!"));
+  }
+}
+
+void play_message(String m, uint8_t outX)
 {
 // sends the message in string 'm' as CW, with inter letter and word spacing
 // s is the speed to play at; if s == 0, use the current speed  
@@ -74,7 +118,7 @@ void play_message(String m)
         // char found, so send it as dots and dashes
         // Serial.println(n);
         for(j=1; j<7; j++)
-          send_morse_char(MorseCode[n].ch[j]);
+          send_morse_char(MorseCode[n].ch[j], outX);
         send_letter_space();  // send an inter-letter space
       }
     }
@@ -93,13 +137,15 @@ int morse_lookup(char c)
   return -1; 
 }
 
-void send_morse_char(char dotdash)
+void send_morse_char(char dotdash, uint8_t outX)
 {
   if(dotdash == '.') {
-    send_dot();
+    Serial.print(F("."));
+    send_dotdash(outX, dot_length_ms);
   }
   if(dotdash == '-') {
-    send_dash();
+    Serial.print(F("-"));
+    send_dotdash(outX, dot_length_ms * CW_DASH_LEN);
   }    
 }
 
@@ -111,5 +157,39 @@ void send_letter_space()
 void send_word_space()
 {
   delay(dot_length_ms * 6);  // wait for 6 dot periods
+  Serial.print(" ");
 }
 
+void send_dotdash(uint8_t outX, int duration)
+{
+  delay(dot_length_ms);  // wait for one dot period (space)
+  switch(outX) {
+    case SI5351_CLK0:
+      leds[0] = CRGB::Blue;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK0, 1);
+      delay(duration);
+      leds[0] = CRGB::Black;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK0, 0);
+      break;
+    case SI5351_CLK1:
+      leds[0] = CRGB::Yellow;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK1, 1);
+      delay(duration);
+      leds[0] = CRGB::Black;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK1, 0);
+      break;
+    case SI5351_CLK2:
+      leds[0] = CRGB::Green;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK2, 1);
+      delay(duration);
+      leds[0] = CRGB::Black;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK2, 0);
+      break;
+  }
+}
