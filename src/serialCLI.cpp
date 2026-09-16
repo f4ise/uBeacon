@@ -2,6 +2,7 @@
 // Created by Wizado F4ISE on 14/08/2026.
 //
 #include <Arduino.h>
+#include <EEPROM.h>
 
 #include <ErriezSerialTerminal.h>
 
@@ -22,21 +23,17 @@ void terminalInit() {
     Serial.println(F("Type 'help' to display usage."));
     printConsoleChar();
 
-    // Initialize the built-in LED
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, LOW);
-
     // Set default handler for unknown commands
     term.setDefaultHandler(unknownCommand);
 
     // Add command callback handlers
     term.addCommand("?", cmdHelp);
     term.addCommand("help", cmdHelp);
-    term.addCommand("on", cmdLedOn);
-    term.addCommand("off", cmdLedOff);
-    term.addCommand("hello", cmdPrintHello);
-    term.addCommand("i", cmdPrintIntArgument);
-    term.addCommand("s", cmdPrintStringArguments);
+    term.addCommand("get", cmdGetConfig);
+    term.addCommand("set", cmdSetConfig);
+    term.addCommand("save", cmdSaveConfig);
+    term.addCommand("erase", cmdEraseEEPROM);
+    term.addCommand("read", cmdReadEEPROM);
 
     //Enable Char Echoing
     term.setSerialEcho(true);
@@ -65,26 +62,10 @@ void cmdHelp()
 {
     // Print usage
     Serial.println(F("Serial terminal usage:"));
-    Serial.println(F("  help or ?          Print this usage"));
-    Serial.println(F("  on                 Turn LED on"));
-    Serial.println(F("  off                Turn LED off"));
-    Serial.println(F("  hello [name] [age] Print your name and age"));
-    Serial.println(F("  s <arg 1>..<arg N> Print string arguments"));
-    Serial.println(F("  i <arg>            Print decimal or hex argument"));
-}
-
-void cmdLedOn()
-{
-    // Turn LED on
-    Serial.println(F("LED on"));
-    digitalWrite(LED_PIN, HIGH);
-}
-
-void cmdLedOff()
-{
-    // Turn LED off
-    Serial.println(F("LED off"));
-    digitalWrite(LED_PIN, LOW);
+    Serial.println(F("  help or ?           Print this command help"));
+    Serial.println(F("  get <type>          Get Config."));
+    Serial.println(F("  set <type> <arg1> <arg2> Set Config."));
+    Serial.println(F("  save                Save Config. to EEPROM"));
 }
 
 void cmdPrintHello()
@@ -204,5 +185,39 @@ void cmdPrintStringArguments()
             Serial.print(F("Remaining: "));
             Serial.println(remaining);
         }
+    }
+}
+
+void cmdGetConfig() {
+    //
+}
+
+void cmdSetConfig() {
+    //
+}
+
+void cmdSaveConfig() {
+    //
+}
+
+void cmdEraseEEPROM() {
+    for (int i = 0 ; i < EEPROM.length() ; i++) {
+        EEPROM.write(i, 0x00);
+    }
+    if (EEPROM.commit()) {
+        Serial.println("EEPROM successfully committed");
+    } else {
+        Serial.println("ERROR! EEPROM commit failed");
+    }
+}
+
+void cmdReadEEPROM() {
+    byte value = 0;
+    for (int i = 0 ; i < EEPROM.length() ; i++) {
+        value = EEPROM.read(i);
+        Serial.print(i);
+        Serial.print("\t");
+        Serial.print(value, DEC);
+        Serial.println();
     }
 }

@@ -22,24 +22,14 @@ void transmitTask(void);
 void setup()
 {
   Serial.begin(115200);
-  delay(1000);
+  delay(2000);
   Serial.println();
   Serial.print(F("-- uBEACON - VERSION: "));
   Serial.print(VERSION);
   Serial.println(F(" --"));
-  byte value = 0;
+
   // EEPROM Backup
-  EEPROM.begin(256);
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    EEPROM.write(i, i);
-  }
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    value = EEPROM.read(i);
-    Serial.print(i);
-    Serial.print("\t");
-    Serial.print(value, DEC);
-    Serial.println();
-  }
+  EEPROM.begin(512);
 
   morseInit();
   terminalInit();
@@ -48,15 +38,18 @@ void setup()
 void loop()
 {
   transmitTask();
-  //receiveCLI();
+  receiveCLI();
 }
 
 // --  FONCTIONS  ------------------------------------------------------
 void transmitTask(void) {
   currMillis = millis();
-  if ((currMillis - lastMillis) > (1000 * DELAY_TX)) {
+  if (((currMillis - lastMillis) > (1000 * DELAY_TX)) /*|| (lastMillis == 0)*/) {
     lastMillis = currMillis;
     Serial.println();
+    Serial.print("TX CLK");
+    Serial.print(currOut);
+    Serial.print(": ");
     play_message(morse_msg[0], currOut);
     currOut++;
     if (currOut >= 3) {

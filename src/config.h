@@ -12,6 +12,6 @@
 #define CALL        "F4ISE"
 #define MSG_01      "CQ CQ CQ DE F4KOE JN25 FORT DE COMBOIRE K"
 #define MSG_02      "CQ CQ CQ SOTA DE F4ISE/P K"
-#define DELAY_TX    60      // delay switch band in second
+#define DELAY_TX    1020      // delay switch band in second
 
 #endif /* CONFIG_H_ */

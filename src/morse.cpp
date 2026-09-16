@@ -10,7 +10,7 @@ CRGB leds[NUM_LEDS];
 
 Si5351 si5351;
 
-unsigned long freqCLK[3] = {28124600, 50293000, 144488500};
+unsigned long freqCLK[3] = {7040200, 50294600, 144490100};
 
 morse_char_t MorseCode[] = {
     {'A', '.', '-',  0,   0,   0,   0},

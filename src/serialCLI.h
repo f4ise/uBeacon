@@ -11,12 +11,17 @@ void receiveCLI(void);
 // Function prototypes
 void unknownCommand(const char *command);
 void cmdHelp();
-void cmdLedOn();
-void cmdLedOff();
 void cmdPrintHello();
 void cmdPrintIntArgument();
 void cmdPrintStringArguments();
 void printConsoleChar();
+
+void cmdGetConfig();
+void cmdSetConfig();
+void cmdSaveConfig();
+
+void cmdEraseEEPROM();
+void cmdReadEEPROM();
 
 
 #endif // SERIALCLI_H
