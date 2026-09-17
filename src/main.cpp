@@ -32,6 +32,7 @@ void setup()
   EEPROM.begin(512);
 
   morseInit();
+
   terminalInit();
 }
 // -- MAIN  ------------------------------------------------------
@@ -47,9 +48,9 @@ void transmitTask(void) {
   if (((currMillis - lastMillis) > (1000 * DELAY_TX)) /*|| (lastMillis == 0)*/) {
     lastMillis = currMillis;
     Serial.println();
-    Serial.print("TX CLK");
+    Serial.print(F("TX CLK"));
     Serial.print(currOut);
-    Serial.print(": ");
+    Serial.print(F(": "));
     play_message(morse_msg[0], currOut);
     currOut++;
     if (currOut >= 3) {

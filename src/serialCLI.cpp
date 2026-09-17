@@ -48,7 +48,7 @@ void receiveCLI() {
 
 void printConsoleChar()
 {
-    Serial.print(F("> "));
+    Serial.print(F("# "));
 }
 
 void unknownCommand(const char *command)
@@ -205,9 +205,9 @@ void cmdEraseEEPROM() {
         EEPROM.write(i, 0x00);
     }
     if (EEPROM.commit()) {
-        Serial.println("EEPROM successfully committed");
+        Serial.println(F("EEPROM successfully committed"));
     } else {
-        Serial.println("ERROR! EEPROM commit failed");
+        Serial.println(F("ERROR! EEPROM commit failed"));
     }
 }
 

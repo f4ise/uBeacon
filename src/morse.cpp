@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 
 #include <FastLED.h>
 #include <si5351.h>
@@ -54,13 +55,41 @@ morse_char_t MorseCode[] = {
     {'.', '.', '-', '.', '-', '.', '-'},
     {',', '-', '-', '.', '.', '-', '-'},
     {'(', '-', '.', '-', '.', '-', 0},
-    {')', '.', '-', '.', '-', '.', 0}
+    {')', '.', '-', '.', '-', '.', 0},
+    {'a', '.', '-',  0,   0,   0,   0},
+    {'b', '-', '.', '.', '.',  0,   0},
+    {'c', '-', '.', '-', '.',  0,   0},
+    {'d', '-', '.', '.',  0,   0,   0},
+    {'e', '.',  0,   0,   0,   0,   0},
+    {'f', '.', '.', '-', '.',  0,   0},
+    {'g', '-', '-', '.',  0,   0,   0},
+    {'h', '.', '.', '.', '.',  0,   0},
+    {'i', '.', '.',  0,   0,   0,   0},
+    {'j', '.', '-', '-', '-',  0,   0},
+    {'k', '-', '.', '-',  0,   0,   0},
+    {'l', '.', '-', '.', '.',  0,   0},
+    {'m', '-', '-',  0,   0,   0,   0},
+    {'n', '-', '.',  0,   0,   0,   0},
+    {'o', '-', '-', '-',  0,   0,   0},
+    {'p', '.', '-', '-', '.',  0,   0},
+    {'q', '-', '-', '.', '-',  0,   0},
+    {'r', '.', '-', '.',  0,   0,   0},
+    {'s', '.', '.', '.',  0,   0,   0},
+    {'t', '-',  0,   0,   0,   0,   0},
+    {'u', '.', '.', '-',  0,   0,   0},
+    {'v', '.', '.', '.', '-',  0,   0},
+    {'w', '.', '-', '-',  0,   0,   0},
+    {'x', '-', '.', '.', '-',  0,   0},
+    {'y', '-', '.', '-', '-',  0,   0},
+    {'z', '-', '-', '.', '.',  0,   0}
 };
-
 
 void morseInit() {
   FastLED.addLeds<WS2812B, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(64);
+
+  // Restore Config
+  restoreConfig();
 
   // Start serial and initialize the Si5351
   bool i2c_detect = si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0);
@@ -90,6 +119,10 @@ void morseInit() {
   }
 }
 
+void restoreConfig(void) {
+  //
+}
+
 void play_message(String m, uint8_t outX)
 {
 // sends the message in string 'm' as CW, with inter letter and word spacing
@@ -111,7 +144,7 @@ void play_message(String m, uint8_t outX)
     {
       if( (n = morse_lookup(buff[i])) == -1 )
       {
-        // char not found, ignore it (but report it on Serial)
+        Serial.print(F("char not found"));
       }
       else
       {
@@ -157,7 +190,7 @@ void send_letter_space()
 void send_word_space()
 {
   delay(dot_length_ms * 6);  // wait for 6 dot periods
-  Serial.print(" ");
+  Serial.print(F(" "));
 }
 
 void send_dotdash(uint8_t outX, int duration)
@@ -183,12 +216,25 @@ void send_dotdash(uint8_t outX, int duration)
       si5351.output_enable(SI5351_CLK1, 0);
       break;
     case SI5351_CLK2:
-      leds[0] = CRGB::Green;
+      leds[0] = CRGB::Red;
       FastLED.show();
       si5351.output_enable(SI5351_CLK2, 1);
       delay(duration);
       leds[0] = CRGB::Black;
       FastLED.show();
+      si5351.output_enable(SI5351_CLK2, 0);
+      break;
+    case 3:
+      leds[0] = CRGB::Green;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK0, 1);
+      si5351.output_enable(SI5351_CLK1, 1);
+      si5351.output_enable(SI5351_CLK2, 1);
+      delay(duration);
+      leds[0] = CRGB::Black;
+      FastLED.show();
+      si5351.output_enable(SI5351_CLK0, 0);
+      si5351.output_enable(SI5351_CLK1, 0);
       si5351.output_enable(SI5351_CLK2, 0);
       break;
   }
