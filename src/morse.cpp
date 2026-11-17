@@ -1,17 +1,22 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
+#ifdef ARDUINO_ARCH_RP2040
 #include <FastLED.h>
+#endif
+
 #include <si5351.h>
 
 #include "config.h"
 #include "morse.h"
 
+#ifdef ARDUINO_ARCH_RP2040
 CRGB leds[NUM_LEDS];
+#endif
 
 Si5351 si5351;
 
-unsigned long freqCLK[3] = {7040200, 50294600, 144490100};
+unsigned long freqCLK[3] = {FREQ_CLK0, FREQ_CLK1, FREQ_CLK2};
 
 morse_char_t MorseCode[] = {
     {'A', '.', '-',  0,   0,   0,   0},
@@ -85,8 +90,11 @@ morse_char_t MorseCode[] = {
 };
 
 void morseInit() {
-  FastLED.addLeds<WS2812B, DATA_PIN>(leds, NUM_LEDS);
-  FastLED.setBrightness(64);
+
+#ifdef ARDUINO_ARCH_RP2040
+    FastLED.addLeds<WS2812B, DATA_PIN>(leds, NUM_LEDS);
+    FastLED.setBrightness(64);
+#endif
 
   // Restore Config
   restoreConfig();
@@ -198,41 +206,58 @@ void send_dotdash(uint8_t outX, int duration)
   delay(dot_length_ms);  // wait for one dot period (space)
   switch(outX) {
     case SI5351_CLK0:
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Blue;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK0, 1);
       delay(duration);
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Black;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK0, 0);
       break;
     case SI5351_CLK1:
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Yellow;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK1, 1);
       delay(duration);
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Black;
       FastLED.show();
+#endif
+
       si5351.output_enable(SI5351_CLK1, 0);
       break;
     case SI5351_CLK2:
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Red;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK2, 1);
       delay(duration);
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Black;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK2, 0);
       break;
     case 3:
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Green;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK0, 1);
       si5351.output_enable(SI5351_CLK1, 1);
       si5351.output_enable(SI5351_CLK2, 1);
       delay(duration);
+#ifdef ARDUINO_ARCH_RP2040
       leds[0] = CRGB::Black;
       FastLED.show();
+#endif
       si5351.output_enable(SI5351_CLK0, 0);
       si5351.output_enable(SI5351_CLK1, 0);
       si5351.output_enable(SI5351_CLK2, 0);

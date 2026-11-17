@@ -201,6 +201,7 @@ void cmdSaveConfig() {
 }
 
 void cmdEraseEEPROM() {
+#ifdef ARDUINO_ARCH_RP2040
     for (int i = 0 ; i < EEPROM.length() ; i++) {
         EEPROM.write(i, 0x00);
     }
@@ -209,9 +210,11 @@ void cmdEraseEEPROM() {
     } else {
         Serial.println(F("ERROR! EEPROM commit failed"));
     }
+#endif
 }
 
 void cmdReadEEPROM() {
+#ifdef ARDUINO_ARCH_RP2040
     byte value = 0;
     for (int i = 0 ; i < EEPROM.length() ; i++) {
         value = EEPROM.read(i);
@@ -220,4 +223,5 @@ void cmdReadEEPROM() {
         Serial.print(value, DEC);
         Serial.println();
     }
+#endif
 }

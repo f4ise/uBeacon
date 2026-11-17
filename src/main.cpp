@@ -28,9 +28,10 @@ void setup()
   Serial.print(VERSION);
   Serial.println(F(" --"));
 
+#ifdef ARDUINO_ARCH_RP2040
   // EEPROM Backup
   EEPROM.begin(512);
-
+#endif
   morseInit();
 
   terminalInit();
@@ -47,14 +48,22 @@ void transmitTask(void) {
   currMillis = millis();
   if (((currMillis - lastMillis) > (1000 * DELAY_TX)) /*|| (lastMillis == 0)*/) {
     lastMillis = currMillis;
-    Serial.println();
-    Serial.print(F("TX CLK"));
-    Serial.print(currOut);
-    Serial.print(F(": "));
-    play_message(morse_msg[0], currOut);
-    currOut++;
-    if (currOut >= 3) {
-      currOut = 0;
+
+    if (NUM_TXOUT <= 3) {
+      Serial.println();
+      Serial.print(F("TX CLK"));
+      Serial.print(currOut);
+      Serial.print(F(": "));
+      play_message(morse_msg[0], currOut);
+      currOut++;
+      if (currOut >= NUM_TXOUT) {
+        currOut = 0;
+      }
+    }
+    else {
+      Serial.println();
+      Serial.print(F("TX CLK0/CLK1/CLK2: "));
+      play_message(morse_msg[0], 3);
     }
   }
 }

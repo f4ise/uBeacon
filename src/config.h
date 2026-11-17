@@ -12,6 +12,11 @@
 #define CALL        "F4KOE"
 #define MSG_01      "CQ CQ CQ DE F4KOE JN25 FORT DE COMBOIRE K"
 #define MSG_02      "CQ CQ CQ SOTA DE F4KOE/P K"
-#define DELAY_TX    1020      // delay switch band in second
+#define DELAY_TX    30      // delay switch band in second
+#define NUM_TXOUT   4       // If 4 then All TX simultaneously
+
+#define FREQ_CLK0   7040200     //Frequency in Hertz
+#define FREQ_CLK1   50294600    //Frequency in Hertz
+#define FREQ_CLK2   144490100   //Frequency in Hertz
 
 #endif /* CONFIG_H_ */
